@@ -13,13 +13,18 @@ def lcm(a,b): return abs(a * b)/fractions.gcd(a,b) if a and b else 0
 
 from options.train_options import TrainOptions
 from data.data_loader import CreateDataLoader
-from models.models import create_model
 import util.util as util
 from util.visualizer import Visualizer
 
 def main():
     opt = TrainOptions().parse()
     iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
+
+    if not opt.mark:
+        from models.models import create_model
+    else:
+        from models.m_models import create_model # m_flag
+
     if opt.continue_train:
         try:
             start_epoch, epoch_iter = np.loadtxt(iter_path , delimiter=',', dtype=int)
@@ -56,6 +61,7 @@ def main():
     print_delta = total_steps % opt.print_freq
     save_delta = total_steps % opt.save_latest_freq
 
+    fake_last = torch.zeros(1, 3, 576, 1024) # m_flag
     for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         epoch_start_time = time.time()
         if epoch != start_epoch:
@@ -67,11 +73,28 @@ def main():
             epoch_iter += opt.batchSize
 
             # whether to collect output images
-            save_fake = total_steps % opt.display_freq == display_delta
-
+            if not opt.mark:
+                save_fake = total_steps % opt.display_freq == display_delta
+            else:
+                save_fake = True
+        
             ############## Forward Pass ######################
-            losses, generated = model(Variable(data['label']), Variable(data['inst']), 
-                Variable(data['image']), Variable(data['feat']), infer=save_fake)
+
+            if not opt.mark:
+                losses, generated = model(Variable(data['label']), Variable(data['inst']), 
+                    Variable(data['image']), Variable(data['feat']), infer=save_fake)
+            else:
+                losses, generated = model(Variable(data['label']), Variable(data['inst']), 
+                    Variable(data['image']), Variable(data['feat']), 
+                    label_last = Variable(data['label_last']), 
+                    image_last = Variable(data['image_last']), 
+                    fake_last = fake_last, infer=save_fake)
+                fake_last = generated
+
+            # from model: forward(self, label, inst, image, feat, infer=False)
+            # from pdb, label and image have true sizes
+            # fake_image = self.netG.forward(input_concat) <- input_concat = input_label <- label
+            # pred_fake = self.discriminate(input_label, real_image)
 
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
@@ -108,7 +131,8 @@ def main():
                 #call(["nvidia-smi", "--format=csv", "--query-gpu=memory.used,memory.free"]) 
 
             ### display output images
-            if save_fake:
+            # if save_fake: # m_flag
+            if total_steps % opt.display_freq == display_delta: # m_flag
                 visuals = OrderedDict([('input_label', util.tensor2label(data['label'][0], opt.label_nc)),
                                     ('synthesized_image', util.tensor2im(generated.data[0])),
                                     ('real_image', util.tensor2im(data['image'][0]))])

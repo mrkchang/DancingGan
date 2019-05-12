@@ -62,6 +62,9 @@ class BaseOptions():
         self.parser.add_argument('--nef', type=int, default=16, help='# of encoder filters in the first conv layer')        
         self.parser.add_argument('--n_clusters', type=int, default=10, help='number of clusters for features')        
 
+
+        self.parser.add_argument('--mark', action='store_true', help='run, if Mark') 
+
         self.initialized = True
 
     def parse(self, save=True):

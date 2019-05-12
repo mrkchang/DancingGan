@@ -33,7 +33,8 @@ class Pix2PixHDModel(BaseModel):
         if not opt.no_instance:
             netG_input_nc += 1
         if self.use_features:
-            netG_input_nc += opt.feat_num
+            netG_input_nc += opt.feat_num      
+        print("hello hello hello, I'm a generator. My input channel size is %s" %netG_input_nc)            
         self.netG = networks.define_G(netG_input_nc, opt.output_nc, opt.ngf, opt.netG, 
                                       opt.n_downsample_global, opt.n_blocks_global, opt.n_local_enhancers, 
                                       opt.n_blocks_local, opt.norm, gpu_ids=self.gpu_ids)        
@@ -41,9 +42,11 @@ class Pix2PixHDModel(BaseModel):
         # Discriminator network
         if self.isTrain:
             use_sigmoid = opt.no_lsgan
-            netD_input_nc = input_nc + opt.output_nc
+            # netD_input_nc = input_nc + opt.output_nc 
+            netD_input_nc = input_nc + 2*opt.output_nc # m_flag
             if not opt.no_instance:
                 netD_input_nc += 1
+            print("hello hello hello, I'm a discriminator. My input channel size is %s" %netD_input_nc)            
             self.netD = networks.define_D(netD_input_nc, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
                                           opt.num_D, not opt.no_ganFeat_loss, gpu_ids=self.gpu_ids)
 
@@ -143,15 +146,17 @@ class Pix2PixHDModel(BaseModel):
 
         return input_label, inst_map, real_image, feat_map
 
-    def discriminate(self, input_label, test_image, use_pool=False):
-        input_concat = torch.cat((input_label, test_image.detach()), dim=1)
+    def discriminate(self, input_label, test_image, input_label_last, test_image_last, use_pool=False): # m_flag
+        input_concat = torch.cat((input_label, input_label_last, test_image.detach(), test_image_last.detach()), dim=1) # m_flag
         if use_pool:            
             fake_query = self.fake_pool.query(input_concat)
             return self.netD.forward(fake_query)
         else:
             return self.netD.forward(input_concat)
 
-    def forward(self, label, inst, image, feat, infer=False):
+    # def forward(self, label, inst, image, feat, infer=False):
+    def forward(self, label, inst, image, feat, label_last, image_last, fake_last, infer=False): # m_flag
+        pdb.set_trace()
         # Encode Inputs
         input_label, inst_map, real_image, feat_map = self.encode_input(label, inst, image, feat)  
 
@@ -162,18 +167,22 @@ class Pix2PixHDModel(BaseModel):
             input_concat = torch.cat((input_label, feat_map), dim=1)                        
         else:
             input_concat = input_label
-        fake_image = self.netG.forward(input_concat)
+        # fake_image = self.netG.forward(input_concat)
+        fake_image = self.netG.forward(torch.cat((input_concat, fake_last), dim=1)) # m_flag
+        # image size torch.Size([1, 3, 576, 1024])
 
         # Fake Detection and Loss
-        pred_fake_pool = self.discriminate(input_label, fake_image, use_pool=True)
+        pred_fake_pool = self.discriminate(input_label, fake_image, 
+                                        input_label_last = label_last, test_image_last = fake_last, use_pool=True)
         loss_D_fake = self.criterionGAN(pred_fake_pool, False)        
 
         # Real Detection and Loss        
-        pred_real = self.discriminate(input_label, real_image)
+        pred_real = self.discriminate(input_label, real_image,
+                                        input_label_last = label_last, test_image_last = image_last)
         loss_D_real = self.criterionGAN(pred_real, True)
 
         # GAN loss (Fake Passability Loss)        
-        pred_fake = self.netD.forward(torch.cat((input_label, fake_image), dim=1))        
+        pred_fake = self.netD.forward(torch.cat((input_label, label_last, fake_image, fake_last), dim=1))        
         loss_G_GAN = self.criterionGAN(pred_fake, True)               
         
         # GAN feature matching loss
