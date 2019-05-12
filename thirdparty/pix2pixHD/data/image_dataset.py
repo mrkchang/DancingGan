@@ -10,7 +10,7 @@ class ImageDataset(BaseDataset):
         self.opt = opt
         self.root = opt.dataroot
 
-        sortKey = lambda x: int(x.split("/")[-1][len("figure"):][:-len(".jpg")])
+        sortKey = lambda x: int(x.split("/")[-1].split("\\")[-1][len("frame"):][:-len(".jpg")])
         ### input A (real_images)
         dir_A = '_A'
         self.dir_A = os.path.join(opt.dataroot, opt.phase + dir_A)
