@@ -7,7 +7,7 @@ from torch.autograd import Variable
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
-import pdb
+# import pdb
 class Pix2PixHDModel(BaseModel):
     def name(self):
         return 'Pix2PixHDModel'
@@ -156,7 +156,6 @@ class Pix2PixHDModel(BaseModel):
 
     # def forward(self, label, inst, image, feat, infer=False):
     def forward(self, label, inst, image, feat, label_last, image_last, fake_last, infer=False): # m_flag
-        pdb.set_trace()
         # Encode Inputs
         input_label, inst_map, real_image, feat_map = self.encode_input(label, inst, image, feat)  
 
