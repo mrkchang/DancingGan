@@ -36,7 +36,9 @@ class CustomDatasetDataLoader(BaseDataLoader):
 
 def CreateVideoDataset(opt):
     dataset = None
-    from data.image_dataset import ImageDataset
+    from data.image_dataset import ImageD
+
+    ataset
     dataset = ImageDataset()
 
     print("dataset [%s] was created" % (dataset.name()))
