@@ -167,7 +167,9 @@ class Pix2PixHDModel(BaseModel):
         else:
             input_concat = input_label
         # fake_image = self.netG.forward(input_concat)
-        fake_image = self.netG.forward(torch.cat((input_concat, fake_last), dim=1)) # m_flag
+        fake_image = self.netG.forward(torch.cat((input_concat, fake_last), dim=1)) \
+            if (not (self.opt.isTrain) or (np.random.uniform() > self.opt.real_prob) ) \
+            else self.netG.forward(torch.cat((input_concat, image_last), dim=1))# m_flag
         # image size torch.Size([1, 3, 576, 1024])
 
         # Fake Detection and Loss
