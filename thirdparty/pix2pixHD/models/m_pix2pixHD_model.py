@@ -227,6 +227,8 @@ class Pix2PixHDModel(BaseModel):
                 fake_image = self.netG.forward(torch.cat((input_concat, fake_last), dim=1)) # m_flag
         else:
             # fake_image = self.netG.forward(input_concat)
+            # import pdb
+            # pdb.set_trace()
             fake_image = self.netG.forward(torch.cat((input_concat, fake_last), dim=1)) # m_flag
         return fake_image
 

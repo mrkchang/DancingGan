@@ -5,7 +5,7 @@ from collections import OrderedDict
 from torch.autograd import Variable
 from options.test_options import TestOptions
 from data.data_loader import CreateDataLoader
-from models.models import create_model
+# from models.models import create_model
 import util.util as util
 from util.visualizer import Visualizer
 from util import html
@@ -26,6 +26,11 @@ def main():
     webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.name, opt.phase, opt.which_epoch))
 
     # test
+    if not opt.mark:
+        from models.models import create_model
+    else:
+        from models.m_models import create_model # m_flag
+
     if not opt.engine and not opt.onnx:
         model = create_model(opt)
         if opt.data_type == 16:
@@ -38,7 +43,7 @@ def main():
     else:
         from run_engine import run_trt_engine, run_onnx
         
-    fake_last = torch.zeros(1, 3, 576, 1024) # m_flag
+    fake_last = torch.zeros(1, 3, 576, 1024).cuda() # m_flag
     for i, data in enumerate(dataset):
         if i >= opt.how_many:
             break
@@ -59,10 +64,12 @@ def main():
             generated = run_trt_engine(opt.engine, minibatch, [data['label'], data['inst']])
         elif opt.onnx:
             generated = run_onnx(opt.onnx, opt.data_type, minibatch, [data['label'], data['inst']])
-        else:        
-            generated = model.inference(data['label'], data['inst'], data['image'], fake_last = fake_last)
+        else:
+            # print(1)        
+            generated = model.inference(data['label'], data['inst'], data['image'], fake_last) # m_flag
         
-        fake_last = generated.detach()
+        # print(2)
+        fake_last = generated.detach() # m_flag
         visuals = OrderedDict([('input_label', util.tensor2label(data['label'][0], opt.label_nc)),
                             ('synthesized_image', util.tensor2im(generated.data[0]))])
         img_path = data['path']
