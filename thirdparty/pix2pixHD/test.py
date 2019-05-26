@@ -44,6 +44,7 @@ def main():
         from run_engine import run_trt_engine, run_onnx
         
     fake_last = torch.zeros(1, 3, 576, 1024).cuda() # m_flag
+    fake_last = fake_last.cuda()
     for i, data in enumerate(dataset):
         if i >= opt.how_many:
             break
@@ -65,9 +66,18 @@ def main():
         elif opt.onnx:
             generated = run_onnx(opt.onnx, opt.data_type, minibatch, [data['label'], data['inst']])
         else:
-            # print(1)        
-            generated = model.inference(data['label'], data['inst'], data['image'], fake_last) # m_flag
-        
+            # print(1)
+            # import pdb
+            # pdb.set_trace()
+            # print(fake_last)
+            # print(data['label'])
+            # print(data['inst'])
+            # import pdb
+            # pdb.set_trace()
+            generated = model.inference(label = data['label'], 
+                                inst = data['inst'], 
+                                fake_last = fake_last,
+                                image = data['image']) # m_flag
         # print(2)
         fake_last = generated.detach() # m_flag
         visuals = OrderedDict([('input_label', util.tensor2label(data['label'][0], opt.label_nc)),
