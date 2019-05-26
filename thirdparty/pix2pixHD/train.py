@@ -88,8 +88,8 @@ def main():
                     Variable(data['image']), Variable(data['feat']), 
                     label_last = Variable(data['label_last']), 
                     image_last = Variable(data['image_last']), 
-                    fake_last = fake_last.detach(), infer=save_fake)
-                fake_last = generated
+                    fake_last = fake_last, infer=save_fake)
+                fake_last = generated.detach()
 
             # from model: forward(self, label, inst, image, feat, infer=False)
             # from pdb, label and image have true sizes
