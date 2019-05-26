@@ -43,6 +43,14 @@ class ImageDataset(BaseDataset):
 
         return A_tensor, B_tensor, A_path
 
+    def getZeroImage(self, zeroImagePath):
+        A = Image.open(zeroImagePath)
+        params = get_params(self.opt, A.size)
+
+        transform_A = get_transform(self.opt, params)
+        A_tensor = transform_A(A.convert('RGB'))
+        return A_tensor
+
     def __getitem__(self, index):
         index = max(1, index) #just to make sure it doesnt try to access index -1
         A_tensor_1, B_tensor_1, A_path = self.getWithIndex(index)
