@@ -12,7 +12,7 @@ if not os.path.exists("../data/" + savefolder):
     os.makedirs("../data/" + savefolder)
 
 while success:
-    cv2.imwrite("../data/" + savefolder +"/frame%d.jpg" % count, image)     # save frame as JPEG file
+    cv2.imwrite("../data/" + savefolder +"/frame%d.jpg" % count, cv2.resize(image, (1280, 720)))     # save frame as JPEG file
     success,image = vidcap.read()
     print('Read a new frame', count, ' : ', success)
     count += 1
