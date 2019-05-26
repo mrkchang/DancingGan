@@ -1,8 +1,8 @@
 import cv2
 import os
 print(cv2.__version__)
-vidcap = cv2.VideoCapture('../data/poses.avi')
-savefolder = "train_A"
+vidcap = cv2.VideoCapture('../data/poses_dancer.avi')
+savefolder = "professionalPoses"
 
 success, image = vidcap.read()
 count = 0
@@ -12,7 +12,7 @@ if not os.path.exists("../data/" + savefolder):
     os.makedirs("../data/" + savefolder)
 
 while success:
-    cv2.imwrite("../data/" + savefolder +"/frame%d.jpg" % count, image)     # save frame as JPEG file
+    cv2.imwrite("../data/" + savefolder +"/frame%d.jpg" % count, cv2.resize(image, (1280, 720)))     # save frame as JPEG file
     success,image = vidcap.read()
     print('Read a new frame', count, ' : ', success)
     count += 1
