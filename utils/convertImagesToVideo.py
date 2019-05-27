@@ -22,6 +22,7 @@ height,width,layers=imgs[1].shape
 video=cv2.VideoWriter('generated_video.avi',-1,1,(width,height))
 
 for img in imgs:
+    print(img)
     video.write(img)
 
 cv2.destroyAllWindows()
