@@ -205,6 +205,10 @@ class Pix2PixHDModel(BaseModel):
         return [ self.loss_filter( loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake ), None if not infer else fake_image ]
 
     def inference(self, label, inst, fake_last, image=None):
+        # print(fake_last)
+        # import pdb
+        # pdb.set_trace()
+
         # Encode Inputs        
         image = Variable(image) if image is not None else None
         input_label, inst_map, real_image, _ = self.encode_input(Variable(label), Variable(inst), image, infer=True)
@@ -227,8 +231,9 @@ class Pix2PixHDModel(BaseModel):
                 fake_image = self.netG.forward(torch.cat((input_concat, fake_last), dim=1)) # m_flag
         else:
             # fake_image = self.netG.forward(input_concat)
-            # import pdb
-            # pdb.set_trace()
+            # print(fake_last.is_cuda)
+            # if fake_last.is_cuda == False: fake_last = fake_last.cuda()
+            # print(fake_last.is_cuda)
             fake_image = self.netG.forward(torch.cat((input_concat, fake_last), dim=1)) # m_flag
         return fake_image
 
