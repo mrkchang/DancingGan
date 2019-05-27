@@ -43,8 +43,7 @@ def main():
     else:
         from run_engine import run_trt_engine, run_onnx
         
-    fake_last = torch.zeros(1, 3, 576, 1024).cuda() # m_flag
-    fake_last = fake_last.cuda()
+    fake_last = dataset.getZeroImage("H:\DancingGan\thirdparty\pix2pixHD\datasets\lacoste\train_B\frame0.jpg")#torch.zeros(1, 3, 576, 1024).cuda() # m_flag
     for i, data in enumerate(dataset):
         if i >= opt.how_many:
             break
