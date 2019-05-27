@@ -9,5 +9,8 @@ Using openpose to extract poses and video:
 TRAIN
 >python train.py --label_nc 0 --no_instance --dataroot datasets/lacoste --name dummy --no_flip --serial_batches --input_nc 6 --output_nc 3 --mark --real_prob 0
 
+>python train.py --label_nc 0 --no_instance --dataroot datasets/lacoste --name background0 --no_flip --serial_batches --input_nc 9 --output_nc 3 --mark --background --real_prob 0
+
+
 TEST
 >python test.py --name RandomKeep --label_nc 0 --no_instance --dataroot datasets/lacoste --no_flip --serial_batches --input_nc 6 --output_nc 3 --mark --how_many 33072

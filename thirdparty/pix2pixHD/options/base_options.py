@@ -64,6 +64,7 @@ class BaseOptions():
 
 
         self.parser.add_argument('--mark', action='store_true', help='run, if Mark') 
+        self.parser.add_argument('--background', action='store_true', help='run, if background') 
 
         self.initialized = True
 
