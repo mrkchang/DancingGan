@@ -20,3 +20,7 @@ TEST
 
 GCLOUD STUFF
 gcloud compute scp train_original.mp4 markchang93@dl-vm1-vm:~/DancingGan/file
+
+gcloud compute scp train_original.mp4 mark@dl-vm1-vm:~/DancingGan/file
+
+cat ~/.ssh/id_rsa.pub
