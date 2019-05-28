@@ -67,7 +67,8 @@ def main():
 
     # fake_last = torch.zeros(1, 3, 576, 1024) # m_flag
     # background = dataset.dataset.getZeroImage("H:\\DancingGan\\thirdparty\\pix2pixHD\\datasets\\lacoste\\train_B\\frame0.jpg")
-    background = dataset.dataset.getZeroImage("datasets\\lacoste\\train_B\\frame0.jpg")
+    # background = dataset.dataset.getZeroImage("datasets\\lacoste\\train_B\\frame0.jpg")
+    background = dataset.dataset.getZeroImage(os.path.join("datasets","lacoste","train_B","frame0.jpg"))
     background = torch.unsqueeze(background,dim=0).cuda()#torch.zeros(1, 3, 576, 1024).cuda() # m_flag
     fake_last = background.clone()
 
