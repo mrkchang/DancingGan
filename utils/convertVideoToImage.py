@@ -1,8 +1,8 @@
 import cv2
 import os
 print(cv2.__version__)
-vidcap = cv2.VideoCapture('../data/poses_dancer.avi')
-savefolder = "professionalPoses"
+vidcap = cv2.VideoCapture('../data/train_original.mp4')
+savefolder = "train_B"
 
 success, image = vidcap.read()
 count = 0

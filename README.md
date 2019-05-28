@@ -14,3 +14,9 @@ TRAIN
 
 TEST
 >python test.py --name RandomKeep --label_nc 0 --no_instance --dataroot datasets/lacoste --no_flip --serial_batches --input_nc 6 --output_nc 3 --mark --how_many 33072
+
+
+
+
+GCLOUD STUFF
+gcloud compute scp train_original.mp4 markchang93@dl-vm1-vm:~/DancingGan/file
