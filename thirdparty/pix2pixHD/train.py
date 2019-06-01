@@ -23,7 +23,11 @@ def main():
     if not opt.mark:
         from models.models import create_model
     else:
-        from models.m_models import create_model # m_flag
+        if opt.background:
+
+            from models.mb_models import create_model # m_flag
+        else:
+            from models.m_models import create_model # m_flag
 
     if opt.continue_train:
         try:
@@ -61,7 +65,14 @@ def main():
     print_delta = total_steps % opt.print_freq
     save_delta = total_steps % opt.save_latest_freq
 
-    fake_last = torch.zeros(1, 3, 576, 1024) # m_flag
+    # fake_last = torch.zeros(1, 3, 576, 1024) # m_flag
+    # background = dataset.dataset.getZeroImage("H:\\DancingGan\\thirdparty\\pix2pixHD\\datasets\\lacoste\\train_B\\frame0.jpg")
+    # background = dataset.dataset.getZeroImage("datasets\\lacoste\\train_B\\frame0.jpg")
+    background = dataset.dataset.getZeroImage(os.path.join("datasets","lacoste","train_B","frame0.jpg"))
+    background = torch.unsqueeze(background,dim=0).cuda()#torch.zeros(1, 3, 576, 1024).cuda() # m_flag
+    fake_last = background.clone()
+
+
     for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         epoch_start_time = time.time()
         if epoch != start_epoch:
@@ -84,12 +95,21 @@ def main():
                 losses, generated = model(Variable(data['label']), Variable(data['inst']), 
                     Variable(data['image']), Variable(data['feat']), infer=save_fake)
             else:
-                losses, generated = model(Variable(data['label']), Variable(data['inst']), 
-                    Variable(data['image']), Variable(data['feat']), 
-                    label_last = Variable(data['label_last']), 
-                    image_last = Variable(data['image_last']), 
-                    fake_last = fake_last, infer=save_fake)
-                fake_last = generated.detach()
+                if opt.background:
+                    losses, generated = model(Variable(data['label']), Variable(data['inst']), 
+                        Variable(data['image']), Variable(data['feat']), 
+                        label_last = Variable(data['label_last']), 
+                        image_last = Variable(data['image_last']), 
+                        fake_last = fake_last, background = background, infer=save_fake)
+                    fake_last = generated.detach()
+
+                else:
+                    losses, generated = model(Variable(data['label']), Variable(data['inst']), 
+                        Variable(data['image']), Variable(data['feat']), 
+                        label_last = Variable(data['label_last']), 
+                        image_last = Variable(data['image_last']), 
+                        fake_last = fake_last, infer=save_fake)
+                    fake_last = generated.detach()
 
             # from model: forward(self, label, inst, image, feat, infer=False)
             # from pdb, label and image have true sizes

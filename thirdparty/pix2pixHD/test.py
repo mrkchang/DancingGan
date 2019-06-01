@@ -29,7 +29,11 @@ def main():
     if not opt.mark:
         from models.models import create_model
     else:
-        from models.m_models import create_model # m_flag
+
+        if opt.background:
+            from models.mb_models import create_model # m_flag
+        else:
+            from models.m_models import create_model # m_flag
 
     if not opt.engine and not opt.onnx:
         model = create_model(opt)
@@ -43,7 +47,10 @@ def main():
     else:
         from run_engine import run_trt_engine, run_onnx
         
-    fake_last = dataset.getZeroImage("H:\DancingGan\thirdparty\pix2pixHD\datasets\lacoste\train_B\frame0.jpg")#torch.zeros(1, 3, 576, 1024).cuda() # m_flag
+    background = dataset.dataset.getZeroImage(os.path.join("datasets","lacoste","train_B","frame0.jpg"))
+    background = torch.unsqueeze(background,dim=0).cuda()#torch.zeros(1, 3, 576, 1024).cuda() # m_flag
+    fake_last = background.clone()
+
     for i, data in enumerate(dataset):
         if i >= opt.how_many:
             break
@@ -65,19 +72,19 @@ def main():
         elif opt.onnx:
             generated = run_onnx(opt.onnx, opt.data_type, minibatch, [data['label'], data['inst']])
         else:
-            # print(1)
-            # import pdb
-            # pdb.set_trace()
-            # print(fake_last)
-            # print(data['label'])
-            # print(data['inst'])
-            # import pdb
-            # pdb.set_trace()
-            generated = model.inference(label = data['label'], 
-                                inst = data['inst'], 
-                                fake_last = fake_last,
-                                image = data['image']) # m_flag
-        # print(2)
+            if opt.background:
+                generated = model.inference(label = data['label'], 
+                                    inst = data['inst'], 
+                                    fake_last = fake_last,
+                                    background = background,
+                                    image = data['image']) # m_flag
+
+            else:
+                generated = model.inference(label = data['label'], 
+                                    inst = data['inst'], 
+                                    fake_last = fake_last,
+                                    image = data['image']) # m_flag
+
         fake_last = generated.detach() # m_flag
         visuals = OrderedDict([('input_label', util.tensor2label(data['label'][0], opt.label_nc)),
                             ('synthesized_image', util.tensor2im(generated.data[0]))])
